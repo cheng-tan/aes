@@ -197,6 +197,28 @@ do {
     let key = try AES.createKey(password: password.data(using: .utf8)!, salt: salt)
     print("key:\t\t\t\(key.count)")
     
+    
+    let tag = "com.example.keys.mykey".data(using: .utf8)!
+//    let addquery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+//                                   kSecAttrApplicationTag as String: tag,
+//                                   kSecValueRef as String: key.base64EncodedString()]
+    let addquery: [String: Any] = [
+        String(kSecClass): kSecClassGenericPassword,
+        String(kSecAttrKeySizeInBits): 256,
+        String(kSecAttrEffectiveKeySize): 256,
+        String(kSecAttrApplicationTag): tag,
+        String(kSecValueData): key
+    ]
+      
+    var result: CFTypeRef? = nil
+    let status = SecItemAdd(addquery as CFDictionary, &result)
+    if status != errSecSuccess {
+        print("Error occured during key add: \(status)")
+    } else {
+        print("Created key!")
+        print(result ?? "Still no result though")
+    }
+    
     let aes = try AES(key: key)
 
     let stringToEncrypt: String = "-40.12345678"
